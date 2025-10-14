@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Plant Auction Overlay</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="overlay-frame">
+    <header>
+      <h1>🌿 Plant Auction</h1>
+      <h2 id="plantName">🌹 Rose</h2>
+    </header>
+
+    <main>
+      <section class="auction-info">
+        <div class="timer" id="timer">03:00</div>
+        <div class="donator" id="donator">Waiting for first donator</div>
+      </section>
+
+      <section class="top-list">
+        <h3>🏆 Top 3 Donators</h3>
+        <ul id="topList">
+          <li>1) —</li>
+          <li>2) —</li>
+          <li>3) —</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <div class="rules">
+        • Mindestgebot: 200 Coins<br />
+        • Höchstbietender gewinnt die Pflanze<br />
+        • Timer startet bei 3:00 und reset bei gültigem Gebot
+      </div>
+      <div class="cta">JETZT BIETEN 🚀</div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

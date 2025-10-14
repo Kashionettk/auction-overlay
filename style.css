@@ -1,0 +1,85 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-family: "Segoe UI", sans-serif;
+  color: #b8ffc8;
+}
+
+.overlay-frame {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  border: 4px solid #00ff90;
+  box-shadow: 0 0 30px #00ff90;
+  background: rgba(0, 10, 0, 0.6);
+  padding: 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+header h1 {
+  color: #00ff90;
+  text-shadow: 0 0 15px #00ff90;
+  font-size: 48px;
+  margin: 0;
+}
+header h2 {
+  color: #00ff70;
+  font-size: 72px;
+  margin-top: 10px;
+}
+
+.timer {
+  font-size: 96px;
+  color: #00ff60;
+  text-shadow: 0 0 20px #00ff60;
+}
+
+.donator {
+  font-size: 40px;
+  margin-top: 10px;
+}
+
+.top-list {
+  font-size: 36px;
+}
+.top-list li {
+  list-style: none;
+  margin: 8px 0;
+}
+
+.rules {
+  font-size: 24px;
+  color: #aaffb0;
+}
+
+.cta {
+  font-size: 48px;
+  font-weight: bold;
+  color: #00ff90;
+  text-shadow: 0 0 15px #00ff90;
+  border: 2px solid #00ff90;
+  width: max-content;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: rgba(0, 30, 0, 0.5);
+  margin-top: 20px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 10px #00ff90; }
+  50% { box-shadow: 0 0 30px #00ff90; }
+  100% { box-shadow: 0 0 10px #00ff90; }
+}
+
+.flash {
+  animation: flash 0.6s ease-out;
+}
+@keyframes flash {
+  from { background-color: rgba(0,255,144,0.3); }
+  to { background-color: transparent; }
+}
