@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Plant Auction 3.0</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="overlay-frame">
+    <canvas id="fireworks" class="fireworks"></canvas>
+    <header>
+      <div class="title-row">
+        <div class="left">
+          <h1>🌿 Plant Auction</h1>
+          <h2 id="plantName" contenteditable="true" title="Klicke hier, um Pflanzenname zu bearbeiten">Deine Pflanze hier</h2>
+        </div>
+        <div class="settings">
+          <button id="settingsBtn" title="Einstellungen öffnen">⚙️</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="auction-info">
+        <div class="timer" id="timer">03:00</div>
+        <div class="donator" id="donator">Warte auf Gebot…</div>
+      </section>
+
+      <section class="top-list">
+        <h3>🏆 Top 3 Donatoren</h3>
+        <ul id="topList">
+          <li>1) —</li>
+          <li>2) —</li>
+          <li>3) —</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <div class="rules">
+        • Mindestgebot: <span id="minBidLabel">200</span> Coins<br />
+        • Timer startet bei <span id="startLabel">3:00</span> und reset bei gültigem Gebot<br />
+        • Bei Überbietung &lt;15s → Reset auf 15s
+      </div>
+      <button id="startBtn" class="cta">AUKTION STARTEN 🚀</button>
+    </footer>
+
+    <div id="winnerPopup" class="winner hidden"></div>
+
+    <!-- Settings modal -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Einstellungen</h3>
+        <label>Startdauer (Sekunden): <input id="inputDuration" type="number" min="10" value="180" /></label><br/>
+        <label>Mindestgebot (Coins): <input id="inputMinBid" type="number" min="1" value="200" /></label><br/>
+        <label>Reset-Sekunden bei Last-Second-Überbietung: <input id="inputResetSec" type="number" min="5" value="15" /></label><br/>
+        <button id="saveSettings">Speichern</button>
+        <button id="closeSettings">Schließen</button>
+        <p style="font-size:12px;color:#bfffc8">Hinweis: Änderungen gelten sofort für die nächste Auktion.</p>
+      </div>
+    </div>
+  </div>
+
+<script src="script.js"></script>
+</body>
+</html>
