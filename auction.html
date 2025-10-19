@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Plant Auction 3.1</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="overlay-wrap">
+    <!-- Fireworks canvas over the header area -->
+    <canvas id="fireworks" class="fireworks"></canvas>
+
+    <div class="overlay">
+      <header>
+        <div class="title-row">
+          <div class="left">
+            <h1>🌿 Plant Auction</h1>
+            <!-- editable plant name -->
+            <h2 id="plantName" contenteditable="true" title="Klicke hier um Pflanzennamen zu ändern">Deine Pflanze hier</h2>
+          </div>
+
+          <div class="controls">
+            <button id="settingsBtn" class="icon-btn" title="Einstellungen">⚙️</button>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="main-left">
+          <div class="timer-block">
+            <div class="timer" id="timer">03:00</div>
+            <div class="donator" id="donator">Warte auf Gebot…</div>
+
+            <!-- compact Top-3 unter dem Timer -->
+            <div class="top-block">
+              <h3>🏆 Top 3</h3>
+              <ul id="topList">
+                <li>1) —</li>
+                <li>2) —</li>
+                <li>3) —</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="spacer"></section>
+      </main>
+
+      <footer>
+        <div class="rules">
+          • Mindestgebot: <span id="minBidLabel">200</span> Coins<br/>
+          • Timer startet bei <span id="startLabel">3:00</span><br/>
+          • Bei Überbietung &lt;15s → Reset auf 15s
+        </div>
+
+        <div class="cta-area">
+          <button id="startBtn" class="cta">AUKTION STARTEN 🚀</button>
+          <button id="newAuctionBtn" class="cta hidden">NEUE AUKTION STARTEN</button>
+        </div>
+      </footer>
+
+      <!-- Winner popup -->
+      <div id="winnerPopup" class="winner hidden"></div>
+    </div>
+
+    <!-- Settings modal (small) -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Einstellungen</h3>
+        <label>Startdauer (Sekunden): <input id="inputDuration" type="number" min="10" value="180" /></label>
+        <label>Mindestgebot (Coins): <input id="inputMinBid" type="number" min="1" value="200" /></label>
+        <label>Reset-Sekunden (Last-second): <input id="inputResetSec" type="number" min="5" value="15" /></label>
+        <div class="modal-actions">
+          <button id="saveSettings" class="modal-btn">Speichern</button>
+          <button id="closeSettings" class="modal-btn">Schließen</button>
+        </div>
+        <p class="hint">Hinweis: Änderungen gelten ab der nächsten Auktion.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
