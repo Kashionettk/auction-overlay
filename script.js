@@ -1,220 +1,88 @@
-// script.js - Auction 3.0 logic with fireworks + drumroll (WebAudio)
-(() => {
-  // Configurable values (will be set via settings UI)
-  let START_SECONDS = 180;
-  let MIN_BID = 200;
-  let RESET_SECONDS = 15;
+/* style.css - Plant Auction 3.1 (stream-optimized) */
+:root{
+  --neon: #00FF7F;
+  --neon-2: #00FF60;
+  --text: #DFFFE6;
+  --urgent: #FF3333;
+  --bg: rgba(0,10,0,0.65);
+}
 
-  const timerEl = document.getElementById('timer');
-  const donatorEl = document.getElementById('donator');
-  const topListEl = document.getElementById('topList');
-  const startBtn = document.getElementById('startBtn');
-  const winnerPopup = document.getElementById('winnerPopup');
-  const minBidLabel = document.getElementById('minBidLabel');
-  const startLabel = document.getElementById('startLabel');
+/* Make inner overlay slightly smaller but keep full canvas 1920x1080 workable */
+html,body{height:100%;margin:0;background:transparent;font-family: "Segoe UI", Roboto, Arial, sans-serif;}
+.overlay-wrap{width:1920px;height:1080px;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.overlay{
+  width:85%;             /* smaller visual footprint (85% of 1920) */
+  max-width:1650px;
+  height:85%;
+  max-height:930px;
+  border:4px solid var(--neon);
+  box-shadow:0 0 30px var(--neon);
+  background:var(--bg);
+  padding:18px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:relative;
+  color:var(--text);
+}
 
-  const settingsBtn = document.getElementById('settingsBtn');
-  const settingsModal = document.getElementById('settingsModal');
-  const inputDuration = document.getElementById('inputDuration');
-  const inputMinBid = document.getElementById('inputMinBid');
-  const inputResetSec = document.getElementById('inputResetSec');
-  const saveSettings = document.getElementById('saveSettings');
-  const closeSettings = document.getElementById('closeSettings');
+/* fireworks canvas above header */
+.fireworks{position:absolute;left:0;top:0;width:100%;height:160px;pointer-events:none;z-index:50;mix-blend-mode:screen}
 
-  const fireworksCanvas = document.getElementById('fireworks');
-  const ctx = fireworksCanvas.getContext('2d');
+/* header */
+.title-row{display:flex;justify-content:space-between;align-items:flex-start;z-index:20}
+.left h1{margin:0;color:var(--neon);text-shadow:0 0 12px var(--neon);font-size:36px}
+.left h2{margin:6px 0 0 0;color:var(--neon-2);font-size:48px;outline:none;cursor:text}
 
-  let width = fireworksCanvas.width = window.innerWidth;
-  let height = fireworksCanvas.height = 160; // only over header
-  let totalSeconds = START_SECONDS;
-  let auctionRunning = false;
-  let timerInterval = null;
-  let topDonors = [];
+/* controls */
+.icon-btn{background:transparent;border:2px solid var(--neon);color:var(--neon);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:20px}
 
-  // Audio - simple epic drumroll using WebAudio API
-  const AudioCtx = window.AudioContext || window.webkitAudioContext;
-  const audioCtx = AudioCtx ? new AudioCtx() : null;
+/* main layout */
+main{display:flex;align-items:flex-start;gap:12px;margin-top:4px;z-index:10}
+.main-left{flex:1}
+.spacer{width:240px}
 
-  function drumroll(duration = 1800) {
-    if (!audioCtx) return;
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
-    // pitch sweep
-    osc.frequency.setValueAtTime(60, now);
-    osc.frequency.exponentialRampToValueAtTime(800, now + duration/1000);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration/1000);
-    osc.start(now);
-    osc.stop(now + duration/1000 + 0.05);
-  }
+/* timer block */
+.timer-block{padding:8px}
+.timer{font-size:84px;color:#ffffff;text-shadow:0 0 14px rgba(255,255,255,0.06);font-weight:700}
+.timer.urgent{color:var(--urgent);animation: pulse-urgent 0.9s infinite}
+@keyframes pulse-urgent{
+  0%{opacity:1;transform:scale(1)}
+  50%{opacity:0.85;transform:scale(1.02)}
+  100%{opacity:1;transform:scale(1)}
+}
 
-  // Fireworks engine (simple particle bursts)
-  const particles = [];
-  function spawnFirework(x,y) {
-    const colors = [[255,140,60],[255,220,80],[140,255,120],[180,255,255]];
-    const color = colors[Math.floor(Math.random()*colors.length)];
-    const count = 40 + Math.floor(Math.random()*40);
-    for (let i=0;i<count;i++) {
-      const angle = Math.random()*Math.PI*2;
-      const speed = Math.random()*4 + 1.5;
-      particles.push({
-        x, y,
-        vx: Math.cos(angle)*speed,
-        vy: Math.sin(angle)*speed,
-        life: 60 + Math.floor(Math.random()*40),
-        color,
-        size: 2 + Math.random()*3
-      });
-    }
-  }
+.donator{font-size:26px;margin-top:8px}
 
-  function updateParticles() {
-    for (let i = particles.length-1; i >= 0; i--) {
-      const p = particles[i];
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy += 0.08; // gravity
-      p.life--;
-      p.vx *= 0.995;
-      p.vy *= 0.995;
-      if (p.life <= 0 || p.y > height+20) particles.splice(i,1);
-    }
-  }
+/* compact top 3 under timer */
+.top-block{margin-top:12px;background:rgba(0,0,0,0.06);padding:10px;border-radius:10px;border:1px solid rgba(0,255,140,0.06);width:360px}
+.top-block h3{margin:0 0 8px 0;color:var(--neon);font-size:20px}
+.top-block ul{list-style:none;padding:0;margin:0}
+.top-block li{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(0,255,140,0.06);font-size:20px}
 
-  function renderParticles() {
-    ctx.clearRect(0,0,width,height);
-    for (const p of particles) {
-      ctx.beginPath();
-      ctx.fillStyle = `rgba(${p.color[0]},${p.color[1]},${p.color[2]},${Math.max(0.08, p.life/80)})`;
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
+/* footer */
+footer{display:flex;justify-content:space-between;align-items:center;padding-top:8px;z-index:10}
+.rules{font-size:18px;color:#bfffc8}
+.cta-area{display:flex;gap:12px}
+.cta{font-size:26px;font-weight:700;color:var(--neon);text-shadow:0 0 12px var(--neon);border:2px solid var(--neon);padding:10px 20px;border-radius:10px;background:rgba(0,30,0,0.45);cursor:pointer}
+.hidden{display:none}
 
-  function fireworksLoop() {
-    updateParticles();
-    renderParticles();
-    requestAnimationFrame(fireworksLoop);
-  }
-  fireworksLoop();
+/* winner popup */
+.winner{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);font-size:56px;color:var(--neon);text-shadow:0 0 20px var(--neon);background:rgba(0,0,0,0.75);padding:20px 36px;border-radius:12px;border:3px solid var(--neon);z-index:60;display:flex;align-items:center;justify-content:center}
 
-  // Utility functions
-  function formatTime(sec) {
-    const m = Math.floor(sec/60);
-    const s = sec%60;
-    return `${m}:${String(s).padStart(2,'0')}`;
-  }
+/* modal */
+.modal{position:absolute;right:20px;top:94px;z-index:70}
+.modal .modal-content{background:#031003;color:var(--text);border:2px solid var(--neon);padding:14px;border-radius:10px;width:300px;box-shadow:0 0 20px rgba(0,0,0,0.6)}
+.modal label{display:block;margin:8px 0;font-size:14px}
+.modal input{width:100%;padding:6px;margin-top:4px;border-radius:6px;border:1px solid rgba(0,255,140,0.12);background:rgba(0,0,0,0.18);color:var(--text)}
+.modal .modal-actions{margin-top:10px}
+.modal .modal-btn{padding:8px 12px;margin-right:8px;border-radius:6px;border:1px solid var(--neon);background:transparent;color:var(--neon);cursor:pointer}
+.hint{font-size:12px;color:#bfffc8;margin-top:8px}
 
-  function updateDisplay() {
-    timerEl.textContent = formatTime(totalSeconds);
-    minBidLabel.textContent = MIN_BID;
-    startLabel.textContent = formatTime(START_SECONDS);
-  }
-
-  function tick() {
-    totalSeconds--;
-    updateDisplay();
-    if (totalSeconds <= 0) {
-      stopAuction();
-    }
-  }
-
-  function startAuction() {
-    if (auctionRunning) return;
-    auctionRunning = true;
-    startBtn.classList.add('hidden');
-    totalSeconds = START_SECONDS;
-    topDonors = [];
-    updateTopList();
-    donatorEl.textContent = 'Auktion läuft…';
-    winnerPopup.classList.add('hidden');
-    timerInterval = setInterval(tick, 1000);
-  }
-
-  function stopAuction() {
-    clearInterval(timerInterval);
-    auctionRunning = false;
-    const winner = topDonors[0]?.name || 'Niemand';
-    // epischer Trommelwirbel kurz bevor Gewinner erscheint
-    drumroll(1800);
-    setTimeout(()=>{
-      winnerPopup.textContent = `🏆 ${winner} gewinnt!`;
-      winnerPopup.classList.remove('hidden');
-      // Start fireworks above header
-      const headerY = 60;
-      for (let i=0;i<6;i++) {
-        const x = 200 + i*160 + (Math.random()*60-30);
-        spawnFirework(x, headerY + Math.random()*20);
-      }
-    }, 1900);
-    donatorEl.textContent = 'Auktion beendet';
-  }
-
-  function resetIfLastSeconds() {
-    if (auctionRunning && totalSeconds <= RESET_SECONDS) {
-      totalSeconds = RESET_SECONDS;
-      updateDisplay();
-    }
-  }
-
-  function updateTopList() {
-    topListEl.innerHTML = topDonors.map((d,i)=>`<li>${i+1}) ${d.name} — ${d.amount} Coins</li>`).join('');
-  }
-
-  // This will be called by TikFinity (Execute JavaScript) or tests
-  window.updateDonator = function(name, amount) {
-    // Only count if auction is running
-    if (!auctionRunning) return;
-    // Only count gifts with amount >= MIN_BID
-    if (typeof amount !== 'number') amount = Number(amount) || 0;
-    if (amount < MIN_BID) return;
-    donatorEl.textContent = `${name} — ${amount} Coins`;
-    // sum donations per user
-    const existing = topDonors.find(d=>d.name === name);
-    if (existing) existing.amount += amount; else topDonors.push({name, amount});
-    topDonors.sort((a,b)=>b.amount - a.amount);
-    topDonors = topDonors.slice(0,3);
-    updateTopList();
-    // reset timer if in last seconds
-    resetIfLastSeconds();
-  };
-
-  // Simple helper to simulate gifts for local testing (dev only)
-  window.__simulateGift = function(name, amount) {
-    window.updateDonator(name, amount);
-  };
-
-  // settings UI
-  settingsBtn.addEventListener('click', ()=>{
-    settingsModal.classList.remove('hidden');
-    inputDuration.value = START_SECONDS;
-    inputMinBid.value = MIN_BID;
-    inputResetSec.value = RESET_SECONDS;
-  });
-  closeSettings.addEventListener('click', ()=> settingsModal.classList.add('hidden'));
-  saveSettings.addEventListener('click', ()=>{
-    START_SECONDS = Math.max(10, Number(inputDuration.value) || 180);
-    MIN_BID = Math.max(1, Number(inputMinBid.value) || 200);
-    RESET_SECONDS = Math.max(5, Number(inputResetSec.value) || 15);
-    settingsModal.classList.add('hidden');
-    updateDisplay();
-  });
-
-  // start button click (visible in Studio; hides after start)
-  startBtn.addEventListener('click', startAuction);
-
-  // initial display
-  updateDisplay();
-
-  // resize canvas on window resize
-  window.addEventListener('resize', ()=>{
-    width = fireworksCanvas.width = window.innerWidth;
-    height = fireworksCanvas.height = 160;
-  });
-
-})();
+/* small screen safe */
+@media (max-width:1000px){
+  .overlay{width:95%;height:90%}
+  .timer{font-size:64px}
+  .left h2{font-size:34px}
+}
